@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from crewai.flow import Flow, and_, listen, persist, start
+from crewai.flow import Flow, and_, listen, persist, router, start
 
 from conversational_credit_negotiation_flow.agents import (
     classification_agent,
@@ -16,12 +16,27 @@ from conversational_credit_negotiation_flow.models import (
 class ConversationalFlow(Flow[FlowState]):
     @start()
     def clear_state_if_needed(self):
-        if self.state.debt_negotiation.options.clear_history:
+        if getattr(
+            getattr(self.state.debt_negotiation, "options", None),
+            "clear_history",
+            False,
+        ):
             self.state.user_message = None
             self.state.assistant_message = None
             self.state.history = []
 
-    @listen(clear_state_if_needed)
+    @router(clear_state_if_needed)
+    def check_if_there_is_a_persona(self):
+        if getattr(getattr(self.state.debt_negotiation, "persona", None), None) is None:
+            return "no_persona_found"
+        else:
+            return "persona_found"
+
+    @listen("no_persona_found")
+    def no_persona_found(self):
+        return {}
+
+    @listen("persona_found")
     def generate_plan(self):
         self.state.debt_negotiation.negotiation_plan = debt_negotiation_agent.kickoff(
             f"""
@@ -31,7 +46,7 @@ class ConversationalFlow(Flow[FlowState]):
             """,
         ).pydantic
 
-    @listen(clear_state_if_needed)
+    @listen("persona_found")
     def classify_user_message(self):
         self.state.debt_negotiation.conversation_classification = (
             classification_agent.kickoff(
