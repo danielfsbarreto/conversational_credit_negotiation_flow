@@ -89,8 +89,6 @@ class ConversationalFlow(Flow[FlowState]):
             This is the customer's persona and financial situation:
             {self.state.debt_negotiation.persona}
 
-            Start conversations by already stating the customer's name, and link it to the negotion plan you have.
-
             Lastly, make sure to be concise and to the point in your answers, but not too robotic
             or disrespectful.
 
