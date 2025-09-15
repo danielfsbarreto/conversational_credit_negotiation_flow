@@ -24,6 +24,7 @@ class ConversationalFlow(Flow[FlowState]):
             self.state.user_message = None
             self.state.assistant_message = None
             self.state.history = []
+            self.state.debt_negotiation.options.clear_history = False
 
     @router(clear_state_if_needed)
     def check_if_there_is_a_persona(self):
