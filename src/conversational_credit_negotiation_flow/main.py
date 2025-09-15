@@ -27,13 +27,13 @@ class ConversationalFlow(Flow[FlowState]):
 
     @router(clear_state_if_needed)
     def check_if_there_is_a_persona(self):
-        if getattr(getattr(self.state.debt_negotiation, "persona", None), None) is None:
+        if getattr(self.state.debt_negotiation, "persona", None) is None:
             return "no_persona_found"
         else:
             return "persona_found"
 
     @listen("no_persona_found")
-    def no_persona_found(self):
+    def persona_not_found(self):
         return {}
 
     @listen("persona_found")
